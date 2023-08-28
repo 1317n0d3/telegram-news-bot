@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "telegram bot for creating news posts",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
@@ -10,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.3.1",
-    "node-telegram-bot-api": "^0.61.0"
+    "node-telegram-bot-api": "^0.61.0",
+    "puppeteer": "^21.1.1"
   }
 }
