@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer";
-import https from "https";
 import fs from "fs";
+import { downloadImage } from "./downloadImage.js";
 
 const getPost = async (RESOURCE_URL, EXCEPTION_WORD) => {
   const browser = await puppeteer.launch({
@@ -8,6 +8,7 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD) => {
   });
 
   const page = await browser.newPage();
+  await page.setDefaultNavigationTimeout(0);
 
   await page.goto(`${RESOURCE_URL}`, {
     waitUntil: "domcontentloaded",
@@ -39,28 +40,14 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD) => {
 
   console.log(fullPost);
 
-  const imageName = `./images/${post.id}.jpg`;
-  const file = fs.createWriteStream(imageName);
-
-  https
-    .get(post.imageLink, (response) => {
-      response.pipe(file);
-
-      file.on("finish", () => {
-        file.close();
-      });
-    })
-    .on("error", (err) => {
-      fs.unlink(imageName);
-      console.error(`Error downloading image: ${err.message}`);
-    });
-
   if (
     post.text.toLowerCase().includes(EXCEPTION_WORD) ||
     fullPost.text.toLowerCase().includes(EXCEPTION_WORD)
   ) {
     console.log("Forbidden post...");
-    await browser.close();
+  } else {
+    const imageName = `./images/${post.id}.jpg`;
+    await downloadImage(imageName, post.imageLink);
   }
 
   await browser.close();
