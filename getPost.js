@@ -38,17 +38,32 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD) => {
     return { text };
   });
 
+  const imageName = `./images/${post.id}.jpg`;
+  await downloadImage(imageName, post.imageLink);
+
   console.log(fullPost);
 
-  if (
-    post.text.toLowerCase().includes(EXCEPTION_WORD) ||
-    fullPost.text.toLowerCase().includes(EXCEPTION_WORD)
-  ) {
-    console.log("Forbidden post...");
-  } else {
-    const imageName = `./images/${post.id}.jpg`;
-    await downloadImage(imageName, post.imageLink);
-  }
+  fs.readFile("lastPostId.txt", "utf8", function (error, fileContent) {
+    if (error) throw error;
+
+    let lastPostId = fileContent;
+    console.log(fileContent);
+
+    if (
+      post.text.toLowerCase().includes(EXCEPTION_WORD) ||
+      fullPost.text.toLowerCase().includes(EXCEPTION_WORD) ||
+      lastPostId === post.id
+    ) {
+      console.log("Forbidden or existing post...");
+    } else {
+      let toWrite = `${post.id}`;
+
+      fs.writeFile("lastPostId.txt", toWrite, function (error) {
+        if (error) throw error;
+        console.log("Data recorded successfully to lastPostId.txt");
+      });
+    }
+  });
 
   await browser.close();
 };
