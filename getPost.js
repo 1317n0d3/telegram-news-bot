@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer";
 import fs from "fs";
+import fetch from "node-fetch";
 // import { downloadImage } from "./downloadImage.js";
 
 const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
@@ -38,11 +39,43 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     return { text };
   });
 
+  // TODO: Remove downloadImage module?
   // const imageName = `./images/${post.id}.jpg`;
   // await downloadImage(imageName, post.imageLink);
 
   console.log(fullPost);
 
+  let postText = "";
+  const postLength = (post.title + fullPost.text).length;
+
+  if (postLength > 102) {
+    const response = await fetch("https://api.telegra.ph/createPage", {
+      method: "post",
+      body: JSON.stringify({
+        access_token: process.env.TELEGRAPH_TOKEN,
+        title: post.title,
+        content: [{ tag: "p", children: [`${fullPost.text}`] }],
+        return_content: true,
+        can_edit: false,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+
+    console.log("telegraph data");
+    console.log(data);
+    postText = `<b>${post.title}</b> \n\n ${post.text} \n\n ${data.result.url}`;
+
+    bot.sendMessage(channelLink, postText, {
+      parse_mode: "HTML",
+    });
+  } else {
+    postText = `<b>${post.title}</b> \n\n ${fullPost.text}`;
+  }
+
+  //TODO: Create lastPostId.txt if it doesn't exist
   fs.readFile("lastPostId.txt", "utf8", function (error, fileContent) {
     if (error) throw error;
 
@@ -51,13 +84,14 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
 
     if (
       post.text.toLowerCase().includes(EXCEPTION_WORD) ||
-      fullPost.text.toLowerCase().includes(EXCEPTION_WORD)
-      // lastPostId === post.id
+      fullPost.text.toLowerCase().includes(EXCEPTION_WORD) ||
+      lastPostId === post.id
     ) {
       console.log("Forbidden or existing post...");
     } else {
       bot.sendPhoto(channelLink, post.imageLink, {
-        // caption: `${fullPost.text}`,
+        caption: postText,
+        parse_mode: "HTML",
       });
 
       let toWrite = `${post.id}`;
