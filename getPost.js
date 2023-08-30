@@ -1,8 +1,8 @@
 import puppeteer from "puppeteer";
 import fs from "fs";
-import { downloadImage } from "./downloadImage.js";
+// import { downloadImage } from "./downloadImage.js";
 
-const getPost = async (RESOURCE_URL, EXCEPTION_WORD) => {
+const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
   const browser = await puppeteer.launch({
     headless: "new",
   });
@@ -38,8 +38,8 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD) => {
     return { text };
   });
 
-  const imageName = `./images/${post.id}.jpg`;
-  await downloadImage(imageName, post.imageLink);
+  // const imageName = `./images/${post.id}.jpg`;
+  // await downloadImage(imageName, post.imageLink);
 
   console.log(fullPost);
 
@@ -51,11 +51,15 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD) => {
 
     if (
       post.text.toLowerCase().includes(EXCEPTION_WORD) ||
-      fullPost.text.toLowerCase().includes(EXCEPTION_WORD) ||
-      lastPostId === post.id
+      fullPost.text.toLowerCase().includes(EXCEPTION_WORD)
+      // lastPostId === post.id
     ) {
       console.log("Forbidden or existing post...");
     } else {
+      bot.sendPhoto(channelLink, post.imageLink, {
+        // caption: `${fullPost.text}`,
+      });
+
       let toWrite = `${post.id}`;
 
       fs.writeFile("lastPostId.txt", toWrite, function (error) {
