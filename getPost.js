@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import fs from "fs";
 import fetch from "node-fetch";
-import { downloadImage } from "./downloadImage.js";
+import { uploadByUrl } from "telegraph-uploader";
 
 const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
   const browser = await puppeteer.launch({
@@ -27,7 +27,7 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     return { id, title, text, link, imageLink };
   });
 
-  console.log(post);
+  // console.log(post);
 
   await page.goto(post.link, {
     waitUntil: "domcontentloaded",
@@ -39,15 +39,18 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     return { text };
   });
 
-  console.log(fullPost);
+  // console.log(fullPost);
 
   let postText = "";
   const postLength = (post.title + fullPost.text).length;
+  const maxPostLength = 1000;
 
-  if (postLength > 1020) {
-    // TODO: Remove downloadImage module?
-    // const imageName = `./images/${post.id}.jpg`;
-    // await downloadImage(imageName, post.imageLink);
+  if (postLength > maxPostLength) {
+    let imageLink = "";
+    await uploadByUrl(post.imageLink).then((result) => {
+      // console.log(result);
+      imageLink = result.link;
+    });
 
     const response = await fetch("https://api.telegra.ph/createPage", {
       method: "post",
@@ -55,10 +58,10 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
         access_token: process.env.TELEGRAPH_TOKEN,
         title: post.title,
         content: [
-          // {
-          //   tag: "figure",
-          //   children: [{ tag: "img", attrs: { src: post.imageLink } }],
-          // },
+          {
+            tag: "figure",
+            children: [{ tag: "img", attrs: { src: imageLink } }],
+          },
           { tag: "p", children: [`${fullPost.text}`] },
         ],
         return_content: true,
@@ -70,13 +73,9 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     });
     const data = await response.json();
 
-    console.log("telegraph data");
-    console.log(data);
+    // console.log("telegraph data");
+    // console.log(data);
     postText = `<b>${post.title}</b> \n\n ${post.text} \n\n ${data.result.url}`;
-
-    bot.sendMessage(channelLink, postText, {
-      parse_mode: "HTML",
-    });
   } else {
     postText = `<b>${post.title}</b> \n\n ${fullPost.text}`;
   }
@@ -86,25 +85,31 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     if (error) throw error;
 
     let lastPostId = fileContent;
-    console.log(fileContent);
+    // console.log(fileContent);
 
     if (
       post.text.toLowerCase().includes(EXCEPTION_WORD) ||
-      fullPost.text.toLowerCase().includes(EXCEPTION_WORD) ||
-      lastPostId === post.id
+      fullPost.text.toLowerCase().includes(EXCEPTION_WORD)
+      // lastPostId === post.id
     ) {
       console.log("Forbidden or existing post...");
     } else {
-      bot.sendPhoto(channelLink, post.imageLink, {
-        caption: postText,
-        parse_mode: "HTML",
-      });
+      if (postLength > maxPostLength) {
+        bot.sendMessage(channelLink, postText, {
+          parse_mode: "HTML",
+        });
+      } else {
+        bot.sendPhoto(channelLink, post.imageLink, {
+          caption: postText,
+          parse_mode: "HTML",
+        });
+      }
 
       let toWrite = `${post.id}`;
 
       fs.writeFile("lastPostId.txt", toWrite, function (error) {
         if (error) throw error;
-        console.log("Data recorded successfully to lastPostId.txt");
+        console.log("Data recorded successfully to lastPostId.txt", lastPostId);
       });
     }
   });
