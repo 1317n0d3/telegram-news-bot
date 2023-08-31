@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import fs from "fs";
 import fetch from "node-fetch";
-// import { downloadImage } from "./downloadImage.js";
+import { downloadImage } from "./downloadImage.js";
 
 const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
   const browser = await puppeteer.launch({
@@ -39,22 +39,28 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     return { text };
   });
 
-  // TODO: Remove downloadImage module?
-  // const imageName = `./images/${post.id}.jpg`;
-  // await downloadImage(imageName, post.imageLink);
-
   console.log(fullPost);
 
   let postText = "";
   const postLength = (post.title + fullPost.text).length;
 
-  if (postLength > 102) {
+  if (postLength > 1020) {
+    // TODO: Remove downloadImage module?
+    // const imageName = `./images/${post.id}.jpg`;
+    // await downloadImage(imageName, post.imageLink);
+
     const response = await fetch("https://api.telegra.ph/createPage", {
       method: "post",
       body: JSON.stringify({
         access_token: process.env.TELEGRAPH_TOKEN,
         title: post.title,
-        content: [{ tag: "p", children: [`${fullPost.text}`] }],
+        content: [
+          // {
+          //   tag: "figure",
+          //   children: [{ tag: "img", attrs: { src: post.imageLink } }],
+          // },
+          { tag: "p", children: [`${fullPost.text}`] },
+        ],
         return_content: true,
         can_edit: false,
       }),
