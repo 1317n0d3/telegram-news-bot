@@ -89,8 +89,8 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
 
     if (
       post.text.toLowerCase().includes(EXCEPTION_WORD) ||
-      fullPost.text.toLowerCase().includes(EXCEPTION_WORD)
-      // lastPostId === post.id
+      fullPost.text.toLowerCase().includes(EXCEPTION_WORD) ||
+      lastPostId === post.id
     ) {
       console.log("Forbidden or existing post...");
     } else {
