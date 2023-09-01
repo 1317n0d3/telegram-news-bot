@@ -3,7 +3,13 @@ import fs from "fs";
 import fetch from "node-fetch";
 import { uploadByUrl } from "telegraph-uploader";
 
-const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
+const getPost = async (
+  RESOURCE_URL,
+  EXCEPTION_WORD,
+  channelLink,
+  adminId,
+  bot
+) => {
   const browser = await puppeteer.launch({
     headless: "new",
   });
@@ -15,6 +21,7 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     waitUntil: "domcontentloaded",
   });
 
+  await page.waitForSelector(".post_new-title");
   const post = await page.evaluate(() => {
     const link = document.querySelector(".post_new-title > a").href;
     const title = document.querySelector(".post_new-title > a").innerText;
@@ -33,6 +40,7 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
     waitUntil: "domcontentloaded",
   });
 
+  await page.waitForSelector(".n_main__content");
   const fullPost = await page.evaluate(() => {
     const text = document.querySelector(".n_main__content").innerText;
 
@@ -92,8 +100,11 @@ const getPost = async (RESOURCE_URL, EXCEPTION_WORD, channelLink, bot) => {
       fullPost.text.toLowerCase().includes(EXCEPTION_WORD) ||
       lastPostId === post.id
     ) {
+      bot.sendMessage(adminId, `Forbidden or existing post... id:${post.id}`);
       console.log("Forbidden or existing post...");
     } else {
+      bot.sendMessage(adminId, `Creating post ${post.id}`);
+
       if (postLength > maxPostLength) {
         bot.sendMessage(channelLink, postText, {
           parse_mode: "HTML",

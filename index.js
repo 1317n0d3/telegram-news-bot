@@ -18,6 +18,7 @@ cron.schedule("0,30 * * * *", () => {
     process.env.RESOURCE_URL,
     process.env.EXCEPTION_WORD,
     channelLink,
+    adminId,
     bot
   );
 });
