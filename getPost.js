@@ -21,7 +21,7 @@ const getPost = async (
     waitUntil: "domcontentloaded",
   });
 
-  await page.waitForSelector(".post_new-title");
+  await page.waitForSelector(".post_new-title", { timeout: 0 });
   const post = await page.evaluate(() => {
     const link = document.querySelector(".post_new-title > a").href;
     const title = document.querySelector(".post_new-title > a").innerText;
@@ -40,7 +40,7 @@ const getPost = async (
     waitUntil: "domcontentloaded",
   });
 
-  await page.waitForSelector(".n_main__content");
+  await page.waitForSelector(".n_main__content", { timeout: 0 });
   const fullPost = await page.evaluate(() => {
     const text = document.querySelector(".n_main__content").innerText;
 
