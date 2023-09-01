@@ -16,10 +16,15 @@ const getPost = async (
 
   const page = await browser.newPage();
   await page.setDefaultNavigationTimeout(0);
+  const navigationPromise = page.waitForNavigation({
+    waitUntil: "domcontentloaded",
+  });
 
   await page.goto(`${RESOURCE_URL}`, {
     waitUntil: "domcontentloaded",
   });
+
+  await navigationPromise;
 
   await page.waitForSelector(".post_new-title", { timeout: 0 });
   const post = await page.evaluate(() => {
@@ -39,6 +44,8 @@ const getPost = async (
   await page.goto(post.link, {
     waitUntil: "domcontentloaded",
   });
+
+  await navigationPromise;
 
   await page.waitForSelector(".n_main__content", { timeout: 0 });
   const fullPost = await page.evaluate(() => {
