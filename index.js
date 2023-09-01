@@ -14,6 +14,9 @@ cron.schedule("0,30 * * * *", () => {
   const date = new Date();
   const time = `${date.getDate()}  ${date.getHours()}:${date.getMinutes()}`;
   console.log(`${time} - Fetching post...`);
+
+  bot.sendMessage(adminId, `${time} - Fetching post...`);
+
   getPost(
     process.env.RESOURCE_URL,
     process.env.EXCEPTION_WORD,
