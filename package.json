@@ -26,6 +26,8 @@
     "@electron-forge/maker-zip": "^6.4.2",
     "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
     "@electron-forge/plugin-webpack": "^6.4.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/node-telegram-bot-api": "^0.63.2",
     "@types/react": "^18.2.36",
     "@types/react-dom": "^18.2.14",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -45,13 +47,13 @@
   },
   "dependencies": {
     "dotenv": "^16.3.1",
+    "electron-squirrel-startup": "^1.0.0",
     "node-cron": "^3.0.2",
     "node-fetch": "^3.3.2",
     "node-telegram-bot-api": "^0.61.0",
     "puppeteer": "^21.1.1",
-    "telegraph-uploader": "^2.0.0",
-    "electron-squirrel-startup": "^1.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "telegraph-uploader": "^2.0.0"
   }
 }
