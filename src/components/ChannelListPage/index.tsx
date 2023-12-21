@@ -7,6 +7,7 @@ const ChannelListPage: FC = () => {
     <div>
       <h1>Channels list page</h1>
       <button>add channel</button>
+      <button>settings</button>
       <ChannelList />
     </div>
   );
