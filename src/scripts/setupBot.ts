@@ -1,0 +1,33 @@
+import dotenv from "dotenv";
+// import { getPost } from "./getPost.js";
+import TelegramBot from "node-telegram-bot-api";
+// import cron from "node-cron";
+
+const setupBot = () => {
+  dotenv.config();
+
+  const token = process.env.API_KEY;
+  const adminId = +process.env.ADMIN_ID;
+  // const channelLink = process.env.CHANNEL_LINK;
+  const bot = new TelegramBot(token, { polling: true });
+
+  bot.sendMessage(adminId, `test message`);
+};
+
+// cron.schedule("0,30 * * * *", () => {
+//   const date = new Date();
+//   const time = `${date.getDate()}  ${date.getHours()}:${date.getMinutes()}`;
+//   console.log(`${time} - Fetching post...`);
+
+//   bot.sendMessage(adminId, `${time} - Fetching post...`);
+
+//   getPost(
+//     process.env.RESOURCE_URL,
+//     process.env.EXCEPTION_WORD,
+//     channelLink,
+//     adminId,
+//     bot
+//   );
+// });
+
+export default setupBot;
