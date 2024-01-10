@@ -6,7 +6,7 @@ const App = () => {
   return <ChannelListPage />
 }
 
-const root = createRoot(document.body);
+const root = createRoot(document.querySelector("#root"));
 root.render(<React.StrictMode>
   <App />
 </React.StrictMode>);
